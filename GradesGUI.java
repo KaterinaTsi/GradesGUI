@@ -28,25 +28,25 @@ import java.io.BufferedWriter;
 
 
 /**
- * Η βασική κλάση εκκίνησης του προγράμματος που δημιουργει και εμφανιζει το GUI.
+ * Main class to start the GradesGUI application and display the GUI.
  */
 public class GradesGUI {
 
     public static void main(String[] args) {
-        
+         // Launch the GUI in the Swing event dispatch thread
         SwingUtilities.invokeLater(() ->  new Grades().setVisible(true));
         
     }
 }
 
 /**
- * Κλάση που δημιουργεί το γραφικό περιβάλλον και περιλαμβάνει μεθόδους για την επεξεργασία των βαθμολογιών
- * και τον χειρισμό αρχείων.
+ * Class that creates the GUI and contains methods for processing student grades
+ * and handling file input/output.
  */
 
 class Grades extends JFrame {
     
-    //Δημιουργία components
+     // GUI components
     private JTextField textEntry, textExit;
     private JLabel labelEntry, labelExit, labelResult, keno;
     private JButton btnCalc;
@@ -60,8 +60,8 @@ class Grades extends JFrame {
     
     
      /**
-     * Κατασκευαστής της κλάσης Grades.
-     * Αρχικοποιει και διατάσσει τα γραφικά στοιχεία και προσθετει τον listener.
+     * Constructor of Grades class.
+     * Initializes GUI components, sets layout, and adds action listeners.
      */
     public Grades() {
         
@@ -70,11 +70,11 @@ class Grades extends JFrame {
         
         labelEntry = new JLabel("Όνομα αρχείου εισόδου: ");
         labelExit  = new JLabel("Όνομα αρχείου εξόδου: ");
-        keno = new JLabel();  // Κενη ετικέτα για καλύτερη διάταξη στο παραθυρο
+        keno = new JLabel();  // Empty label for spacing in layout
         
         /** 
-         * Κουμπι υπολογισμοθ με action listener στη μέθοδο process που περιέχει όλες
-         * τις μεθόδους του προγράμματος με την σωστή σειρά εκτέλεσης.
+         * Button to calculate grades. ActionListener triggers process method
+         * that executes all steps in correct order.
         */
         btnCalc = new JButton("Υπολογισμός");
         btnCalc.addActionListener(e -> Process());
@@ -83,14 +83,14 @@ class Grades extends JFrame {
         areaResults.setEditable(false);
         scrollPane = new JScrollPane(areaResults);
        
-        //Ρυθμισεις παραθύρου
+        // Window settings
         setSize(500,400);
         setTitle("Βαθμολογίες φοιτητών");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         setLayout(new GridLayout(4,2));
         
-        // Προσθηκη στοιχειων στο παράθυροο
+        // Add components to window
         add(labelEntry);
         add(textEntry);
         
@@ -107,8 +107,8 @@ class Grades extends JFrame {
     
     
     /**
-     * Εκτελεί την πλήρη διαδικασία: ανάγνωση αρχειου, δημιουργία αρχειου εξόδου
-     * εγγραφή αρχειου εξόδου και εμφάνιση αποτελεσμάτων σε παραθυρο GUI.
+     * Executes the full workflow: read input file, create output file,
+     * write output file, and display results in GUI.
      */
     private void Process() {
         
@@ -120,10 +120,9 @@ class Grades extends JFrame {
     
     
     /**
-     * Διαβάζει το αρχείο εισόδου και αποθηκεύει τις έγκυρες βαθμολογίες .
-     * Καταγράφει τα σφάλματα σε αρχείο log, οι λανθασμενες εγγραφες δεν επεξεργάζονται.
-     * Κάνει επισης έλεγχο για σωστά ΑΜ και  μαθηματα.
-     * Κανει καταγραφή των εγκυρων βαθμολογιών μεσω του validCount.
+     * Reads the input file and stores valid grades.
+     * Logs invalid records to err.log. Performs validation of student ID and lesson name.
+     * Tracks the number of valid entries using validCount.
      */
     
     private void ReadFile() {
@@ -142,18 +141,18 @@ class Grades extends JFrame {
                  String[] parts = line.split(":");
                  
                  
-                 //Ελεγχος για σωστά πεδία με :
+                 // Validate correct format with 3 fields
                  if(parts.length == 3) {
                      
                      String AM = parts[0];
                      String lesson = parts[1];
                      
-                     // Έλεγχος ΑΜ: 6 χαρακτήρες, μόνο γράμματα/ψηφία
+                    // Validate student ID: 6 alphanumeric characters
                      if (!AM.matches("[A-Za-z0-9]{6}")) {
                           System.err.println("Μη έγκυρο ΑΜ: " + AM + " στη γραμμή: " + line);
                            continue;
                        }
-                     // Έλεγχος μαθήματος: μία λέξη, χωρίς κενά
+                   // Validate lesson: single word, no spaces
                      if (!lesson.matches("[A-Za-z0-9_]+")) {
                          System.err.println("Μη έγκυρο μάθημα: " + lesson + " στη γραμμή: " + line);
                          continue;
@@ -184,9 +183,10 @@ class Grades extends JFrame {
          JOptionPane.showMessageDialog(this, "Το αρχείο δεν βρέθηκε: " + filename, "Σφάλμα", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-    /**
-     * Δημιουργεί το αρχείο εξόδου .
+
+
+     /**
+     * Creates the output file if it does not exist.
      */
     private void CreateFile() {
         
@@ -209,11 +209,9 @@ class Grades extends JFrame {
         }
     }
     
-    /**
-     * Κανει εγγραφή στο αρχείο εξόδου τον μεσο όρο βαθμολογίας κάθε φοιτητή
-     * με την ζητούμενη μορφή της εκφώνησης.
-     * Υπολογίζει τονμεσο όρο.
-     * 
+   /**
+     * Writes the average grade of each student to the output file.
+     * Calculates averages and formats the output.
      */
     private void WriteExitFile() {
         
@@ -246,11 +244,10 @@ class Grades extends JFrame {
     }
     
     
+     
     /**
-     * Βρίσκει την μέγιστη και μικροτερη βαθμολογία.
-     * Επιστρέφει κείμενο με την ελάχιστη και μέγιστη βαθμολογία.
-     * 
-     * @return String με μηνυμα που περιεχει min και max τιμές.
+     * Finds minimum and maximum grade across all students.
+     * @return String containing min and max values.
      */
     private String FindMinMax() {
         
@@ -270,7 +267,7 @@ class Grades extends JFrame {
     }
     
     /**
-     * Εμφανίζει τα συνολικά αποτελέσματα στο παράθυρο της εφαρμογής.
+     * Displays overall results in the GUI text area.
      */
     private void WriteGUI() {
         
@@ -283,8 +280,8 @@ class Grades extends JFrame {
     
     
      /**
-     * Καταγράφει μηνύματα σφάλματος στο αρχείο err.log.
-     * @param msg Το μήνυμα που θα καταγραφεί.
+     * Logs error messages to "err.log".
+     * @param msg Message to log
      */
     private void logError(String msg) {
         
